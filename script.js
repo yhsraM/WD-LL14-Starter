@@ -47,6 +47,41 @@ document.getElementById("area-select").addEventListener("change", function () {
           mealDiv.appendChild(title);
           mealDiv.appendChild(img);
           resultsDiv.appendChild(mealDiv);
+
+          // Add a click event to fetch and log detailed info about the recipe
+          mealDiv.addEventListener("click", async function () {
+            // Fetch detailed info using the meal ID
+            try {
+              const response = await fetch(
+                `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.idMeal}`
+              );
+              const detailData = await response.json();
+              // Get the first meal object from the response
+              const mealDetails = detailData.meals[0];
+
+              // Build a list of ingredients
+              let ingredientsList = "<ul>";
+              for (let i = 1; i <= 20; i++) {
+                const ingredient = mealDetails[`strIngredient${i}`];
+                const measure = mealDetails[`strMeasure${i}`];
+                if (ingredient && ingredient.trim() !== "") {
+                  ingredientsList += `<li>${ingredient} - ${measure}</li>`;
+                }
+              }
+              ingredientsList += "</ul>";
+
+              // Set the modal body to show the ingredients
+              const modalBody = document.querySelector(
+                "#infoModal .modal-body"
+              );
+              modalBody.innerHTML = `<strong>Ingredients:</strong> ${ingredientsList}`;
+
+              // Show the modal using Bootstrap's jQuery method
+              $("#infoModal").modal("show");
+            } catch (error) {
+              console.error("Error fetching recipe details:", error);
+            }
+          });
         });
       } else {
         resultsDiv.textContent = "No meals found for this area.";
